@@ -1,0 +1,15 @@
+{
+  "name": "pacman",
+  "version": "1.0.0",
+  "description": "",
+  "main": "pacman.js",
+  "dependencies": {
+    "prompt-sync": "^4.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "pacman"
+  },
+  "author": "barrimos",
+  "license": "ISC"
+}
