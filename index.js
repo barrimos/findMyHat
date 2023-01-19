@@ -14,7 +14,7 @@ let menu = true;
 
   const game = new Stage();
   const move = new Movement(game);
-  let command, method, dir;
+  let command, method;
 
   for(let [...stage] of game.stage){
     console.log([...stage].join(' '));
@@ -43,6 +43,7 @@ let menu = true;
     // 4 => exit
     
     // menu => open menu
+    // status => display your status
 
     if(menu){
       console.log('Select command: \n'+
@@ -82,15 +83,20 @@ let menu = true;
       }
     }
 
-    dir = prompt('Select direction to move: ');
+    command = prompt('Select direction to move: ');
 
-    if(dir === 'menu'){
+    if(command === 'menu'){
       menu = true;
       continue;
     }
 
-    move.move(game, game.stage, game.bombs, game.walls, [game.curr_x, game.curr_y], dir);
-    // Update stage and all position
+    if(command === 'status'){
+      console.log('pacman\'s hp: ', game.pacman.hp);
+      continue;
+    }
+
+    // Game system process
+    move.move(game, command);
 
     // Render update stage
     for(let [...stage] of game.stage){
