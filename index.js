@@ -10,15 +10,20 @@ const { Queue } = require('./Queue');
 
 let menu = true;
 
-(function start(){
-
-  const game = new Stage();
-  const move = new Movement(game);
-  let command, method;
-
-  for(let [...stage] of game.stage){
+const renderStage = (game) => {
+  for(let [...stage] of game){
     console.log([...stage].join(' '));
   }
+}
+
+
+(function start(){
+
+  const game = new Stage(10, 10);
+  const move = new Movement(game);
+  let command, method, done = false;
+
+  renderStage(game.stage);
 
   console.log('Start pacman', [game.curr_x, game.curr_y]);
   console.log('Finish goal', [game.goal_x, game.goal_y]);
@@ -60,20 +65,29 @@ let menu = true;
                     '2. Breath first search\n'+
                     '3. Depth first search\n'+
                     '4. Greedy breath first search\n'+
-                    '5. A star'
+                    '5. A star\n'+
+                    '6. Random walk'
                   );
                   method = prompt('>>>> ');
                   switch(method){
                     case '1': console.log('Dijkstra');
+                              done = true;
                     break;
                     case '2': console.log('Breath first search');
+                              done = true;
                     break;
                     case '3': console.log('Depth first search');
+                              done = true;
                     break;
                     case '4': console.log('Greedy breath first search');
+                              done = true;
                     break;
                     case '5': console.log('A star');
+                              done = true;
                     break
+                    case '6': game.traveller(`1|${game.env.bombs}|${game.env.walls}`, true);
+                              done = true;
+                    break;
                     default: break;
                   };
         break;
@@ -81,6 +95,11 @@ let menu = true;
         return;
         default: return;
       }
+    }
+
+    if(done){
+      renderStage(game.stage);
+      break;
     }
 
     command = prompt('Select direction to move: ');
@@ -99,9 +118,7 @@ let menu = true;
     move.move(game, command);
 
     // Render update stage
-    for(let [...stage] of game.stage){
-      console.log([...stage].join(' '));
-    }
+    renderStage(game.stage);
 
     // If over
     if(game.is_over){

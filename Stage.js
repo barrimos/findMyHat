@@ -11,15 +11,6 @@ class Pacman{
   }
 }
 
-// Environments
-const env = {
-  pathway: '.',
-  walls: '■',
-  bombs: 'x',
-  goal: '♦️',
-};
-
-
 const envLimit = {
   // .77, .11, .12   when stage's size rows * cols more than or equals 16 to 60
   // .7, .15, .15    when stage's size rows * cols more than or equals 61 to 120
@@ -386,15 +377,6 @@ class Stage{
 // for(let [...stage] of game.stage){
 //   console.log([...stage].join(' '));
 // }
-// game.getHeuristic();
-// console.log(game.heuristic);
-// console.log(game.curr_x, game.curr_y);
-// console.log(game.goal_x, game.goal_y);
-// for(let [...stage] of game.manhattan_distance){
-//   console.log([...stage].join(' '));
-// }
-
-// console.log(game.pathway);
 
 // // automatic random travelling to goal
 // game.traveller(`1|${env.bombs}|${env.walls}`, true);
