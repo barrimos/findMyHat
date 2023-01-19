@@ -1,23 +1,20 @@
 const prompt = require("prompt-sync")();
-const { Pacman } = require('./Pacman');
-const { Stage } = require('./Stage');
+const { bfs } = require('./pathfinding/bfs');
+const { greedybfs } = require('./pathfinding/greedybfs');
+const { dfs } = require('./pathfinding/dfs');
+const { dijkstra } = require('./pathfinding/dijkstra');
+const { aStar } = require('./pathfinding/aStar');
+const { Movement } = require('./Movement');
+const { Stage, Pacman } = require('./Stage');
+const { Queue } = require('./Queue');
 
-const game = new Pacman();
+let menu = true;
 
-for(let [...stage] of game.stage){
-  console.log([...stage].join(' '));
-}
+(function start(){
 
-console.log('Start pacman', [game.curr_x, game.curr_y]);
-console.log('Finish goal', [game.goal_x, game.goal_y]);
-console.log(game.getEnvironment().envCount);
-
-
-(function start(condition){
-  if(condition === 'exit'){
-    return;
-  }
-  const game = new Pacman();
+  const game = new Stage();
+  const move = new Movement(game);
+  let command, method, dir;
 
   for(let [...stage] of game.stage){
     console.log([...stage].join(' '));
@@ -25,74 +22,91 @@ console.log(game.getEnvironment().envCount);
 
   console.log('Start pacman', [game.curr_x, game.curr_y]);
   console.log('Finish goal', [game.goal_x, game.goal_y]);
-  console.log(Pacman.envCount);
+  console.log(game.envCount);
 
   while(!game.is_over){
     // Input direction
-    // r = right
-    // l = left
-    // d = down
-    // u = up
-    // ur = upRight
-    // ul = upLeft
-    // dr = downRight
-    // dl = downLeft
+    // r => right
+    // l => left
+    // d => down
+    // u => up
+    // ur => upRight
+    // ul => upLeft
+    // dr => downRight
+    // dl => downLeft
     
+    // menu
     // command
-    // e, exit = exit game
-    // restart = restart game
-    // auto = automatic path finding
+    // 1 => play
+    // 2 => auto(automatic path finding)
+    // 3 => restart
+    // 4 => exit
+    
+    // menu => open menu
 
-
-    const dir = prompt('Which way are you going: ');
-    if(dir === 'exit'){
-      break;
-    }
-    if(dir === 'restart'){
-      start();
-      return;
-    };
-    if(dir === 'auto'){
-      const method = prompt('Which Algorithm do you want to use: \n'+
-      '1. Dijkstra\n'+
-      '2. Breath first search\n'+
-      '3. Depth first search\n'+
-      '4. Greedy breath first search\n'+
-      '5. A star');
-      switch(method){
-        case '1': 'Dijkstra';
+    if(menu){
+      console.log('Select command: \n'+
+      '1. play\n'+
+      '2. auto\n'+
+      '3. restart\n'+
+      '4. exit');
+      command = prompt('>>>> ');
+      switch(command){
+        case '1': menu = false;
         break;
-        case '2': 'Breath first search';
+        case '2': console.log('Which Algorithm do you want to use: \n'+
+                    '1. Dijkstra\n'+
+                    '2. Breath first search\n'+
+                    '3. Depth first search\n'+
+                    '4. Greedy breath first search\n'+
+                    '5. A star'
+                  );
+                  method = prompt('>>>> ');
+                  switch(method){
+                    case '1': console.log('Dijkstra');
+                    break;
+                    case '2': console.log('Breath first search');
+                    break;
+                    case '3': console.log('Depth first search');
+                    break;
+                    case '4': console.log('Greedy breath first search');
+                    break;
+                    case '5': console.log('A star');
+                    break
+                    default: break;
+                  };
         break;
-        case '3': 'Depth first search';
-        break;
-        case '4': 'Greedy breath first search';
-        break;
-        case '5': 'A star';
-        break
+        case '3': start();
+        return;
         default: return;
       }
-    };
-    
-    const move = new Movement(dir);
-    move.move(dir)
+    }
+
+    dir = prompt('Select direction to move: ');
+
+    if(dir === 'menu'){
+      menu = true;
+      continue;
+    }
+
+    move.move(game, game.stage, game.bombs, game.walls, [game.curr_x, game.curr_y], dir);
     // Update stage and all position
 
-    // Render stage
+    // Render update stage
     for(let [...stage] of game.stage){
       console.log([...stage].join(' '));
-    };
+    }
 
     // If over
     if(game.is_over){
       console.log('TOOOOOOM!!! YOU\'RE DEAD');
       break;
-    };
+    }
 
     //if win
     if(game.is_win){
       console.log('CONGRATULATION!!!');
       break;
-    };
+    }
   }
 })();

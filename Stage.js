@@ -1,11 +1,3 @@
-const { Movement } = require('./Movement');
-const { Queue } = require('./Queue');
-const { bfs } = require('./pathfinding/bfs');
-const { greedybfs } = require('./pathfinding/greedybfs');
-const { dfs } = require('./pathfinding/dfs');
-const { dijkstra } = require('./pathfinding/dijkstra');
-const { aStar } = require('./pathfinding/aStar');
-
 // Pacman set
 class Pacman{
   constructor(){
@@ -27,12 +19,6 @@ const env = {
   goal: '♦️',
 };
 
-// Amount total of objects
-const envCount = {
-  pathway: 0,
-  walls: 0,
-  bombs: 0,
-};
 
 const envLimit = {
   // .77, .11, .12   when stage's size rows * cols more than or equals 16 to 60
@@ -48,17 +34,32 @@ class Stage{
   constructor(rows, cols, pacman_x, pacman_y, goal_x, goal_y){
     this.is_win = false;
     this.is_over = false;
-    this.rows = rows || 9;
-    this.cols = cols || 9;
+    this.rows = rows || 3;
+    this.cols = cols || 3;
 
     this.pacman = new Pacman();
     this.stage = new Array;
     this.bombs = new Array;
     this.walls = new Array;
     this.pathway = new Array;
+
+    this.env = {
+      pathway: '.',
+      walls: '■',
+      bombs: 'x',
+      goal: '♦️',
+    };
+
+    this.envCount = {
+      pathway: 0,
+      walls: 0,
+      bombs: 0,
+    }
     
-    this.curr_x = pacman_x || 0;
-    this.curr_y = pacman_y || 0;
+    this.pacman_x = pacman_x;
+    this.pacman_y = pacman_y;
+    this.curr_x = this.pacman_x || 0;
+    this.curr_y = this.pacman_y || 0;
     this.goal_x = goal_x || this.rows - 1;
     this.goal_y = goal_y || this.cols - 1;
 
@@ -67,7 +68,7 @@ class Stage{
     this.visited = new Array;
     this.stack = new Array;
 
-    this.came_from = new Array;
+    this.came_from = new Object;
     this.next = new Array;
     this.cost_so_far = 1;
     this.heuristic = 0;
@@ -81,15 +82,21 @@ class Stage{
 
   minSize = () => {
     if(this.rows < 3 || this.cols < 3){
-      throw new Error('One of stage\'s size can not be less than 3.');
+      throw new Error('One of stage size can not be less than 3.');
     }
     if(this.rows > 20 || this.cols > 20){
-      throw new Error('One of stage\'s size can not be over than 20.');
+      throw new Error('One of stage size can not be over than 20.');
+    }
+  }
+
+  checkPosition = () => {
+    if(this.curr_x > this.rows - 1 || this.curr_y > this.cols - 1){
+      throw new Error('Pacman\'s position out of stage size.');
     }
   }
 
   getEnvironment = () => {
-    return { env, envCount, envLimit };
+    return this.envCount;
   }
 
   randomEnv = () => {
@@ -105,8 +112,8 @@ class Stage{
   checkEnvironmentKey = axis => {
     let [x, y] = axis;
     let envKey;
-    Object.keys(env).forEach((_key) => {
-      if(this.stage[x][y] === env[_key]){
+    Object.keys(this.env).forEach((_key) => {
+      if(this.stage[x][y] === this.env[_key]){
         envKey = _key;
       }
     });
@@ -115,19 +122,17 @@ class Stage{
 
   createStage = () => {
     this.minSize();
-    
+    this.checkPosition();
+
     // create 0 map
     for(let i = 0; i < this.rows; i++){
       this.stage.push([]);
-      // this.manhattan_distance.push([]);
       for(let j = 0; j < this.cols; j++){
         // Display stage
-        this.stage[i].push(env.pathway);
-        // this.manhattan_distance[i].push(Math.abs(this.curr_x - i) + Math.abs(this.curr_y - j));
+        this.stage[i].push(this.env.pathway);
       }
     }
-    // travel the map and change '·' to 1 when visited
-    this.traveller('1');
+    this.traveller();
 
     // // change walls and bombs to pathway because the first stage that generated walls and bombs is too much,
     // // that made the only pathway reach to goal.
@@ -150,7 +155,6 @@ class Stage{
 
         this.solution_stage[this.curr_x][this.curr_y] = this.pacman.r;
 
-
         this.neighborIndex([this.curr_x, this.curr_y], notLookingFor);
 
         if(this.neighbors.length === 0){
@@ -167,13 +171,13 @@ class Stage{
       }
     } else {
       while(true){
-        envCount.pathway++;
+        this.envCount.pathway++;
         this.pathway.push([this.curr_x, this.curr_y]);
         // add position to visited
         this.visited.push([this.curr_x, this.curr_y]);
-  
+
         // at current position check neighbors's index
-        this.neighborIndex([this.curr_x, this.curr_y], notLookingFor);
+        this.neighborIndex([this.curr_x, this.curr_y], '');
 
         if(this.neighbors.length === 0){
           if(this.queue.length === 0){
@@ -186,18 +190,18 @@ class Stage{
           // it's that mean when coming to use backtracking that's mean around this point all of them was found
           // so set in queue to environment instead.
           let r = this.randomEnv();
-          this.stage[this.curr_x][this.curr_y] = env[r];
+          this.stage[this.curr_x][this.curr_y] = this.env[r];
           this.pathway = this.pathway.filter(index => {
             return JSON.stringify(index) !== JSON.stringify([this.curr_x, this.curr_y]);
           });
-          envCount.pathway--;
+          this.envCount.pathway--;
   
           if(r === 'walls'){
-            envCount.walls++;
+            this.envCount.walls++;
             this.walls.push([this.curr_x, this.curr_y]);
           }
           if(r === 'bombs'){
-            envCount.bombs++;
+            this.envCount.bombs++;
             this.bombs.push([this.curr_x, this.curr_y]);
           }
           // use first queue to check backtracking
@@ -222,11 +226,19 @@ class Stage{
 
 
   settingStartGoal = () => {
+    // clone and clear visited
+    // reason to clear the visited is at neighborsIndex() code will not check the neighbors that have already been found.
+    // in this function need to check all neighbos so that have to clear visited like a never found before.
+    // but still need use the data so clone the data and clear it.
     let clone = Object.assign(this.visited);
-    clone.shift();
+    if(this.pacman_x === undefined && this.pacman_y === undefined){
+      clone.shift(); // remove [0, 0]
+    } else {
+      clone = clone.filter(index => {
+        return JSON.stringify(index) !== JSON.stringify([this.curr_x, this.curr_y]);
+      });
+    }
     this.visited = [];
-    // by random select from visited position. visited store all cell that founded from traveller step.
-    // why not use pathway because in this step map chance to decrease obstacle for 1 cell.
     while(true){
       // random new goal's position.
       let rand = Math.floor(Math.random() * clone.length);
@@ -235,7 +247,7 @@ class Stage{
       [this.goal_x, this.goal_y] = new_value;
 
       // check neighbors's goal
-      this.neighborIndex([this.goal_x, this.goal_y], env.pathway);
+      this.neighborIndex([this.goal_x, this.goal_y], this.env.pathway);
 
       let too_close;
       if(this.rows > this.cols || this.rows === this.cols){
@@ -254,19 +266,23 @@ class Stage{
     let key = this.checkEnvironmentKey([this.goal_x, this.goal_y]);
 
     // switch environment
-    this.stage[this.goal_x][this.goal_y] = env.goal;
+    this.stage[this.goal_x][this.goal_y] = this.env.goal;
 
     // filter out if key is pathway do not filter out.
     if(key !== 'pathway'){
       this[key] = this[key].filter(index => {
         return JSON.stringify(index) !== JSON.stringify([this.goal_x, this.goal_y]);
       });
-      envCount.pathway++;
-      envCount[key]--;
+      this.envCount.pathway++;
+      this.envCount[key]--;
     }
 
     // setting start position and [curr_x, curr_y] to [0, 0] for start game
-    [this.curr_x, this.curr_y] = [0, 0];
+    if(this.pacman_x !== undefined && this.pacman_y !== undefined){
+      [this.curr_x, this.curr_y] = [this.pacman_x, this.pacman_y];
+    } else {
+      [this.curr_x, this.curr_y] = [0, 0];
+    }
     this.stage[this.curr_x][this.curr_y] = this.pacman.r;
   }
   
@@ -276,10 +292,10 @@ class Stage{
       let rate = this.rows * this.cols >= 121 ? envLimit[obj][2] : this.rows * this.cols >= 61 && this.rows * this.cols <= 120 ? envLimit[obj][1] : this.rows * this.cols >= 16 && this.rows * this.cols <= 60 ? envLimit[obj][0] : 1;
 
       // loop until walls or bombs less than rate
-      while(envCount[obj] > Math.ceil((this.rows * this.cols) * rate)){
+      while(this.envCount[obj] > Math.ceil((this.rows * this.cols) * rate)){
         // change walls or bombs to pathway
-        let rand = Math.floor(Math.random() * envCount[obj]);
-        this.stage[this[obj][rand][0]][this[obj][rand][1]] = env.pathway;
+        let rand = Math.floor(Math.random() * this.envCount[obj]);
+        this.stage[this[obj][rand][0]][this[obj][rand][1]] = this.env.pathway;
   
         // push index into pathway before filter out from that array.
         this.pathway.push([this[obj][rand][0], this[obj][rand][1]]);
@@ -290,8 +306,8 @@ class Stage{
         });
   
         // update count
-        envCount[obj]--;
-        envCount.pathway++;
+        this.envCount[obj]--;
+        this.envCount.pathway++;
       }
     });
   }
@@ -366,10 +382,18 @@ class Stage{
   }
 }
 
-const game = new Stage();
-for(let [...stage] of game.stage){
-  console.log([...stage].join(' '));
-}
+// const game = new Stage();
+// for(let [...stage] of game.stage){
+//   console.log([...stage].join(' '));
+// }
+// game.getHeuristic();
+// console.log(game.heuristic);
+// console.log(game.curr_x, game.curr_y);
+// console.log(game.goal_x, game.goal_y);
+// for(let [...stage] of game.manhattan_distance){
+//   console.log([...stage].join(' '));
+// }
+
 // console.log(game.pathway);
 
 // // automatic random travelling to goal
