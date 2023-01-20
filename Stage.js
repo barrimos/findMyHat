@@ -22,7 +22,7 @@ const envLimit = {
 };
 
 class Stage{
-  constructor(rows, cols, pacman_x, pacman_y, goal_x, goal_y){
+  constructor(rows, cols, start_x, start_y){
     this.is_win = false;
     this.is_over = false;
     this.rows = rows || 3;
@@ -47,12 +47,10 @@ class Stage{
       bombs: 0,
     }
     
-    this.pacman_x = pacman_x;
-    this.pacman_y = pacman_y;
-    this.curr_x = this.pacman_x || 0;
-    this.curr_y = this.pacman_y || 0;
-    this.goal_x = goal_x || this.rows - 1;
-    this.goal_y = goal_y || this.cols - 1;
+    this.curr_x = start_x || 0;
+    this.curr_y = start_y || 0;
+    this.goal_x = this.rows - 1;
+    this.goal_y = this.cols - 1;
 
     this.neighbors = new Array;
     this.queue = new Array;
@@ -222,13 +220,9 @@ class Stage{
     // in this function need to check all neighbos so that have to clear visited like a never found before.
     // but still need use the data so clone the data and clear it.
     let clone = Object.assign(this.visited);
-    if(this.pacman_x === undefined && this.pacman_y === undefined){
-      clone.shift(); // remove [0, 0]
-    } else {
-      clone = clone.filter(index => {
-        return JSON.stringify(index) !== JSON.stringify([this.curr_x, this.curr_y]);
-      });
-    }
+    clone = clone.filter(index => {
+      return JSON.stringify(index) !== JSON.stringify([0, 0]); // filter pacman's position out.
+    });
     this.visited = [];
     while(true){
       // random new goal's position.
@@ -269,11 +263,7 @@ class Stage{
     }
 
     // setting start position and [curr_x, curr_y] to [0, 0] for start game
-    if(this.pacman_x !== undefined && this.pacman_y !== undefined){
-      [this.curr_x, this.curr_y] = [this.pacman_x, this.pacman_y];
-    } else {
-      [this.curr_x, this.curr_y] = [0, 0];
-    }
+    [this.curr_x, this.curr_y] = [0, 0];
     this.stage[this.curr_x][this.curr_y] = this.pacman.r;
   }
   
@@ -379,7 +369,7 @@ class Stage{
 // }
 
 // // automatic random travelling to goal
-// game.traveller(`1|${env.bombs}|${env.walls}`, true);
+// game.traveller(`1|${game.env.bombs}|${game.env.walls}`, true);
 // for(let [...stage] of game.solution_stage){
 //   console.log([...stage].join(' '));
 // }

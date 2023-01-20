@@ -19,8 +19,9 @@ const renderStage = (game) => {
 
 (function start(){
 
-  const game = new Stage(10, 10);
+  const game = new Stage();
   const move = new Movement(game);
+  const queue = new Queue();
   let command, method, done = false;
 
   renderStage(game.stage);
@@ -70,19 +71,19 @@ const renderStage = (game) => {
                   );
                   method = prompt('>>>> ');
                   switch(method){
-                    case '1': console.log('Dijkstra');
+                    case '1': dijkstra(game, move, queue);
                               done = true;
                     break;
-                    case '2': console.log('Breath first search');
+                    case '2': bfs(game, move, queue);
                               done = true;
                     break;
-                    case '3': console.log('Depth first search');
+                    case '3': dfs(game, move, queue);
                               done = true;
                     break;
-                    case '4': console.log('Greedy breath first search');
+                    case '4': greedybfs(game, move, queue);
                               done = true;
                     break;
-                    case '5': console.log('A star');
+                    case '5': aStar(game, move, queue);
                               done = true;
                     break
                     case '6': game.traveller(`1|${game.env.bombs}|${game.env.walls}`, true);
