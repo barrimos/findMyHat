@@ -1,12 +1,7 @@
 const prompt = require("prompt-sync")();
-const { bfs } = require('./pathfinding/bfs');
-const { greedybfs } = require('./pathfinding/greedybfs');
-const { dfs } = require('./pathfinding/dfs');
-const { dijkstra } = require('./pathfinding/dijkstra');
-const { aStar } = require('./pathfinding/aStar');
+const { Pathfinding } = require('./Pathfinding');
 const { Movement } = require('./Movement');
 const { Stage, Pacman } = require('./Stage');
-const { Queue } = require('./Queue');
 
 let menu = true;
 
@@ -20,8 +15,8 @@ const renderStage = (game) => {
 (function start(){
 
   const game = new Stage();
-  const move = new Movement(game);
-  const queue = new Queue();
+  const move = new Movement();
+  const pathFinding = new Pathfinding(game, move);
   let command, method, done = false;
 
   renderStage(game.stage);
@@ -71,19 +66,19 @@ const renderStage = (game) => {
                   );
                   method = prompt('>>>> ');
                   switch(method){
-                    case '1': dijkstra(game, move, queue);
+                    case '1': pathFinding.dijkstra();
                               done = true;
                     break;
-                    case '2': bfs(game, move, queue);
+                    case '2': pathFinding.bfs();
                               done = true;
                     break;
-                    case '3': dfs(game, move, queue);
+                    case '3': pathFinding.dfs();
                               done = true;
                     break;
-                    case '4': greedybfs(game, move, queue);
+                    case '4': pathFinding.greedybfs();
                               done = true;
                     break;
-                    case '5': aStar(game, move, queue);
+                    case '5': pathFinding.aStar();
                               done = true;
                     break
                     case '6': game.traveller(`1|${game.env.bombs}|${game.env.walls}`, true);
@@ -103,7 +98,7 @@ const renderStage = (game) => {
       break;
     }
 
-    command = prompt('Select direction to move: ');
+    command = prompt('\'u\/r\/d\/l\' or \'menu\' or \'status\': ');
 
     if(command === 'menu'){
       menu = true;

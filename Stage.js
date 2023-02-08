@@ -117,9 +117,11 @@ class Stage{
     // create 0 map
     for(let i = 0; i < this.rows; i++){
       this.stage.push([]);
+      this.manhattan_distance.push([]);
       for(let j = 0; j < this.cols; j++){
         // Display stage
         this.stage[i].push(this.env.pathway);
+        this.manhattan_distance[i].push(0);
       }
     }
     this.traveller();
@@ -146,7 +148,7 @@ class Stage{
         this.solution_stage[this.curr_x][this.curr_y] = this.pacman.r;
 
         // this.neighborIndex([this.curr_x, this.curr_y], notLookingFor);
-        this.neighbors = neighborIndex(this, [this.curr_x, this.curr_y], notLookingFor);
+        this.neighbors = utils.neighborIndex(this, [this.curr_x, this.curr_y], notLookingFor);
 
         if(this.neighbors.length === 0){
           if(this.stack.length === 0){
@@ -169,7 +171,7 @@ class Stage{
 
         // at current position check neighbors's index
         // this.neighborIndex([this.curr_x, this.curr_y], '');
-        this.neighbors = neighborIndex(this, [this.curr_x, this.curr_y], '');
+        this.neighbors = utils.neighborIndex(this, [this.curr_x, this.curr_y], '');
 
         if(this.neighbors.length === 0){
           if(this.queue.length === 0){
@@ -236,7 +238,7 @@ class Stage{
 
       // check neighbors's goal
       // this.neighborIndex([this.goal_x, this.goal_y], this.env.pathway);
-      this.neighbors = neighborIndex(this, [this.goal_x, this.goal_y], this.env.pathway);
+      this.neighbors = utils.neighborIndex(this, [this.goal_x, this.goal_y], this.env.pathway);
 
       let too_close;
       if(this.rows > this.cols || this.rows === this.cols){

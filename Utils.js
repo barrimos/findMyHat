@@ -26,7 +26,7 @@
 // not looking for pathway.
 // neighborIndex([1, 1], '·');
 // return [[0, 1], [2, 1]]
-neighborIndex = (game, axis, notLooking, is_all_dir = false) => {
+const neighborIndex = (game, axis, notLooking, is_all_dir = false) => {
   let neighbors = [];
   let [curr_x, curr_y] = axis;
 
@@ -68,3 +68,9 @@ neighborIndex = (game, axis, notLooking, is_all_dir = false) => {
   }
   return neighbors;
 }
+
+const manhattanDistance = () => {
+  
+}
+
+module.exports = { neighborIndex, manhattanDistance };
