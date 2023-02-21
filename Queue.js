@@ -45,6 +45,9 @@ class Queue{
     }
     this.maxlength(this.extendleft.name);
   }
+  put = x => {
+    this.element.push(x);
+  }
   pop = () => {
     this.element.pop();
   }
@@ -55,12 +58,8 @@ class Queue{
     return this.element.indexOf(x, start)
   }
   append = x => {
-    if(Array.isArray(x)){
-      for(let i of x){
-        this.element.push(i);
-      }
-    } else {
-      this.element.push(x);
+    for(let i of x){
+      this.element.push(i);
     }
     this.maxlength(this.append.name);
   }

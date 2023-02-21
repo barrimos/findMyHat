@@ -22,8 +22,12 @@ const envLimit = {
   bombs: [.12, .15, .23],
 };
 
+/**
+ * @param rows -: size of stage's width, default is 3.
+ * @param cols -: size of stage's height, default is 3.
+ */
 class Stage{
-  constructor(rows, cols, start_x, start_y){
+  constructor(rows, cols){
     this.is_win = false;
     this.is_over = false;
     this.rows = rows || 3;
@@ -31,6 +35,7 @@ class Stage{
 
     this.pacman = new Pacman();
     this.stage = new Array;
+    this.weights = new Object;
     this.bombs = new Array;
     this.walls = new Array;
     this.pathway = new Array;
@@ -48,8 +53,8 @@ class Stage{
       bombs: 0,
     }
     
-    this.curr_x = start_x || 0;
-    this.curr_y = start_y || 0;
+    this.curr_x = 0;
+    this.curr_y = 0;
     this.goal_x = this.rows - 1;
     this.goal_y = this.cols - 1;
 
@@ -62,7 +67,7 @@ class Stage{
     this.next = new Array;
     this.cost_so_far = 1;
     this.heuristic = 0;
-    this.manhattan_distance = new Array;
+    this.manhattan_stage = new Array;
     this.path_finder = new Array;
 
     this.isSolution = false;
@@ -117,11 +122,9 @@ class Stage{
     // create 0 map
     for(let i = 0; i < this.rows; i++){
       this.stage.push([]);
-      this.manhattan_distance.push([]);
       for(let j = 0; j < this.cols; j++){
         // Display stage
         this.stage[i].push(this.env.pathway);
-        this.manhattan_distance[i].push(0);
       }
     }
     this.traveller();
@@ -132,6 +135,16 @@ class Stage{
     this.changeToPathway();
 
     this.settingStartGoal();
+
+    // Manhattan distance and weight each position.
+    for(let i = 0; i < this.rows; i++){
+      this.manhattan_stage.push([]);
+      for(let j = 0; j < this.cols; j++){
+        // Display stage
+        this.manhattan_stage[i].push(Math.abs(i - this.goal_x) + Math.abs(j - this.goal_y));
+        this.weights[`[${i},${j}]`] = this.manhattan_stage[i][j];
+      }
+    }
   }
 
   traveller = (notLookingFor, solution = false) => {
@@ -142,6 +155,7 @@ class Stage{
         if((this.curr_x === this.goal_x) && (this.curr_y === this.goal_y)){
           this.path_finder.push([this.curr_x, this.curr_y]);
           this.solution_stage[this.curr_x][this.curr_y] = this.pacman.win;
+          this.is_win = true;
           break;
         }
 

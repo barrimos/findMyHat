@@ -7,6 +7,7 @@ class Movement{
     }
     if(next[0] === game.goal_x && next[1] === game.goal_y){
       game.is_win = true;
+      game.stage[next[0]][next[1]] = game.pacman.win;
       return;
     }
   }
@@ -25,29 +26,44 @@ class Movement{
   }
 
   // check walls first then move then check isWinOrDie
-  move = (game, dir) => {
+  move = (game, dir, show_path = false) => {
     const stage = game.stage;
-    const d = dir.toLowerCase();
+    let d;
 
     // check next
     let current = [game.curr_x, game.curr_y];
     let next;
+    if((Array.isArray(dir) && dir.length === 2)){
+      if((dir[0] > game.curr_x) && (dir[1] === game.curr_y)){
+        d = 'd';
+      }
+      if((dir[0] === game.curr_x) && (dir[1] > game.curr_y)){
+        d = 'r';
+      }
+      if((dir[0] < game.curr_x) && (dir[1] === game.curr_y)){
+        d = 'u';
+      }
+      if((dir[0] === game.curr_x) && (dir[1] < game.curr_y)){
+        d = 'l';
+      }
+    } else {
+      d = dir.toLowerCase();
+    }
     switch(d){
       case 'r': next = [current[0], current[1] + 1];
-        break;
+      break;
       case 'l': next = [current[0], current[1] - 1];
-        break;
+      break;
       case 'u': next = [current[0] - 1, current[1]];
-        break;
+      break;
       case 'd': next = [current[0] + 1, current[1]];
-        break;
+      break;
       default: return 'You select wrong direction.';
     }
 
     let isPassable = this.passable(game, next);
-    if(isPassable){
+    if(isPassable && !show_path){
       stage[current[0]][current[1]] = game.env.pathway;
-      stage[next[0]][next[1]] = game.pacman.r;
     }
     if(d === 'r' && isPassable){
       game.curr_y += 1;

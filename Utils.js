@@ -69,8 +69,4 @@ const neighborIndex = (game, axis, notLooking, is_all_dir = false) => {
   return neighbors;
 }
 
-const manhattanDistance = () => {
-  
-}
-
-module.exports = { neighborIndex, manhattanDistance };
+module.exports = { neighborIndex };

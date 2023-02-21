@@ -14,7 +14,7 @@ const renderStage = (game) => {
 
 (function start(){
 
-  const game = new Stage();
+  const game = new Stage(10, 10);
   const move = new Movement();
   const pathFinding = new Pathfinding(game, move);
   let command, method, done = false;
@@ -67,19 +67,19 @@ const renderStage = (game) => {
                   method = prompt('>>>> ');
                   switch(method){
                     case '1': pathFinding.dijkstra();
-                              done = true;
+                              done = pathFinding.done;
                     break;
                     case '2': pathFinding.bfs();
-                              done = true;
+                              done = pathFinding.done;
                     break;
                     case '3': pathFinding.dfs();
-                              done = true;
+                              done = pathFinding.done;
                     break;
-                    case '4': pathFinding.greedybfs();
-                              done = true;
+                    case '4': pathFinding.greedy_bfs();
+                              done = pathFinding.done;
                     break;
                     case '5': pathFinding.aStar();
-                              done = true;
+                              done = pathFinding.done;
                     break
                     case '6': game.traveller(`1|${game.env.bombs}|${game.env.walls}`, true);
                               done = true;
@@ -95,26 +95,25 @@ const renderStage = (game) => {
 
     if(done){
       renderStage(game.stage);
-      break;
+    } else {
+      command = prompt('\'u\/r\/d\/l\' or \'menu\' or \'status\': ');
+
+      if(command === 'menu'){
+        menu = true;
+        continue;
+      }
+  
+      if(command === 'status'){
+        console.log('pacman\'s hp: ', game.pacman.hp);
+        continue;
+      }
+  
+      // Game system process
+      move.move(game, command);
+  
+      // Render update stage
+      renderStage(game.stage);
     }
-
-    command = prompt('\'u\/r\/d\/l\' or \'menu\' or \'status\': ');
-
-    if(command === 'menu'){
-      menu = true;
-      continue;
-    }
-
-    if(command === 'status'){
-      console.log('pacman\'s hp: ', game.pacman.hp);
-      continue;
-    }
-
-    // Game system process
-    move.move(game, command);
-
-    // Render update stage
-    renderStage(game.stage);
 
     // If over
     if(game.is_over){
