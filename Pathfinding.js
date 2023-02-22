@@ -91,7 +91,7 @@ class Pathfinding{
     this.done = true;
   }
 
-  dfs = () => {}
+  // dfs = () => {}
 
   dijkstra = () => {
     frontier.insert(0, [this.game.curr_x, this.game.curr_y]);
@@ -124,7 +124,7 @@ class Pathfinding{
     frontier.insert(0, [this.game.curr_x, this.game.curr_y]);
     came_from[`[${this.game.curr_x},${this.game.curr_y}]`] = null;
     cost_so_far[`[${this.game.curr_x},${this.game.curr_y}]`] = 0;
-    let i = 0;
+
     while(!frontier.empty()){
       let current = frontier.get();
 

@@ -142,13 +142,13 @@ class Stage{
       for(let j = 0; j < this.cols; j++){
         // Display stage
         this.manhattan_stage[i].push(Math.abs(i - this.goal_x) + Math.abs(j - this.goal_y));
-        this.weights[`[${i},${j}]`] = this.manhattan_stage[i][j];
       }
     }
   }
 
   traveller = (notLookingFor, solution = false) => {
     this.isSolution = solution;
+    let cost = 0;
     if(this.isSolution){
       this.solution_stage = [...this.stage];
       while(true){
@@ -186,6 +186,10 @@ class Stage{
         // at current position check neighbors's index
         // this.neighborIndex([this.curr_x, this.curr_y], '');
         this.neighbors = utils.neighborIndex(this, [this.curr_x, this.curr_y], '');
+        this.neighbors.forEach(n => {
+          this.weights[`[${n[0]},${n[1]}]`] = cost + 1;
+        });
+        cost++;
 
         if(this.neighbors.length === 0){
           if(this.queue.length === 0){
@@ -214,6 +218,7 @@ class Stage{
           }
           // use first queue to check backtracking
           [this.curr_x, this.curr_y] = this.queue.shift();
+          this.weights[`[${this.curr_x},${this.curr_y}]`] += 5;
   
         } else {
           // random index from this.neighbors
