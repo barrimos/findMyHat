@@ -23,15 +23,15 @@ const envLimit = {
 };
 
 /**
- * @param rows -: size of stage's width, default is 3.
- * @param cols -: size of stage's height, default is 3.
+ * @param rows -: size of stage's width, default is 10.
+ * @param cols -: size of stage's height, default is 10.
  */
 class Stage{
   constructor(rows, cols){
     this.is_win = false;
     this.is_over = false;
-    this.rows = rows || 3;
-    this.cols = cols || 3;
+    this.rows = rows || 10;
+    this.cols = cols || 10;
 
     this.pacman = new Pacman();
     this.stage = new Array;
@@ -76,11 +76,11 @@ class Stage{
   }
 
   minSize = () => {
-    if(this.rows < 3 || this.cols < 3){
-      throw new Error('One of stage size can not be less than 3.');
+    if(this.rows < 10 || this.cols < 10){
+      throw new Error('One of stage size can not be less than 10.');
     }
-    if(this.rows > 20 || this.cols > 20){
-      throw new Error('One of stage size can not be over than 20.');
+    if(this.rows > 30 || this.cols > 30){
+      throw new Error('One of stage size can not be over than 30.');
     }
   }
 

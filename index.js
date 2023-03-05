@@ -16,7 +16,7 @@ const renderStage = (game) => {
 
   const game = new Stage();
   const move = new Movement();
-  const pathFinding = new Pathfinding(game, move);``
+  const pathFinding = new Pathfinding(game, move);
   let command, method, done = false;
 
   renderStage(game.stage);
