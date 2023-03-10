@@ -1,4 +1,7 @@
 class Movement{
+  constructor(){
+    this.temp = undefined;
+  }
   isWinOrDie = (game, next) => {
     if(JSON.stringify(game.bombs).includes(JSON.stringify(next)) && game.pacman.hp === 0){
       game.is_over = true;
@@ -62,9 +65,18 @@ class Movement{
     }
 
     let isPassable = this.passable(game, next);
+
     if(isPassable && !show_path){
-      stage[current[0]][current[1]] = game.env.pathway;
+      if(this.temp === undefined){
+        this.temp = game.env.pathway;
+      }
+      stage[current[0]][current[1]] = this.temp;
     }
+
+    if(isPassable){
+      this.temp = stage[next[0]][next[1]];
+    }
+
     if(d === 'r' && isPassable){
       game.curr_y += 1;
       stage[next[0]][next[1]] = game.pacman.r;

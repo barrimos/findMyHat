@@ -2,10 +2,6 @@ const utils = require('./Utils');
 const { Queue } = require('./Queue');
 const { Movement } = require('./Movement');
 const move = new Movement();
-const frontier = new Queue();
-const came_from = {};
-const cost_so_far = {};
-let piority;
 let i = 0;
 
 class Pathfinding{
@@ -13,6 +9,10 @@ class Pathfinding{
     this.game = game;
     this.done = false;
     this.path = [];
+    this.came_from = {};
+    this.cost_so_far = {};
+    this.priority = 0;
+    this.frontier = new Queue();
   }
   reconstructPath = (came_from, start, goal) => {
     let current = goal;
@@ -25,9 +25,13 @@ class Pathfinding{
     for(let i = 0; i < this.path.length; i++){
       move.move(this.game, this.path[i], true);
     }
+    this.done = true;
     return true;
   }
   cost = (from_node, to_node) => {
+    if(!this.game.weights.hasOwnProperty(to_node)){
+      throw new Error(`Invalid node: ${to_node}`);
+    }
     return this.game.weights[to_node];
   }
   heuristic = (a, b) => {
@@ -37,17 +41,17 @@ class Pathfinding{
   }
   isGoal = current => {
     if((current[0] === this.game.goal_x) && (current[1] === this.game.goal_y)){
-      return this.reconstructPath(came_from, [this.game.curr_x, this.game.curr_y], [this.game.goal_x, this.game.goal_y]);
+      return this.reconstructPath(this.came_from, [this.game.curr_x, this.game.curr_y], [this.game.goal_x, this.game.goal_y]);
     } else {
       return false;
     }
   }
   bfs = () => {
-    frontier.put([this.game.curr_x, this.game.curr_y]);
-    came_from[`[${this.game.curr_x},${this.game.curr_y}]`] = null;
+    this.frontier.put([this.game.curr_x, this.game.curr_y]);
+    this.came_from[`[${this.game.curr_x},${this.game.curr_y}]`] = undefined;
     
-    while(!frontier.empty()){
-      let current = frontier.get();
+    while(!this.frontier.empty()){
+      let current = this.frontier.get();
 
 
       if(this.isGoal(current)){
@@ -56,22 +60,21 @@ class Pathfinding{
 
       let neighbors = utils.neighborIndex(this.game, current, `${this.game.env.bombs}|${this.game.env.walls}`);
       for(let next of neighbors){
-        if(came_from[`[${next}]`] === undefined){
-          frontier.put(next);
-          came_from[`[${next}]`] = current;
+        if(this.came_from[`[${next}]`] === undefined){
+          this.frontier.put(next);
+          this.came_from[`[${next}]`] = current;
           // this.game.stage[next[0]][next[1]] = i;
           // i++;
         }
       }
     }
-    this.done = true;
   }
   greedy_bfs = () => {
-    frontier.put([this.game.curr_x, this.game.curr_y]);
-    came_from[`[${this.game.curr_x},${this.game.curr_y}]`] = null;
+    this.frontier.put([this.game.curr_x, this.game.curr_y]);
+    this.came_from[`[${this.game.curr_x},${this.game.curr_y}]`] = undefined;
 
-    while(!frontier.empty()){
-      let current = frontier.get();
+    while(!this.frontier.empty()){
+      let current = this.frontier.get();
 
       if(this.isGoal(current)){
         break;
@@ -79,27 +82,26 @@ class Pathfinding{
 
       let neighbors = utils.neighborIndex(this.game, current, `${this.game.env.bombs}|${this.game.env.walls}`);
       for(let next of neighbors){
-        if(came_from[`[${next}]`] === undefined){
-          piority = this.heuristic([this.goal_x, this.goal_y], next)
-          frontier.insert(piority, next);
-          came_from[`[${next}]`] = current;
+        if(this.came_from[`[${next}]`] === undefined){
+          this.priority = this.heuristic([this.goal_x, this.goal_y], next)
+          this.frontier.insert(this.priority, next);
+          this.came_from[`[${next}]`] = current;
           // this.game.stage[next[0]][next[1]] = i;
           // i++;
         }
       }
     }
-    this.done = true;
   }
 
   // dfs = () => {}
 
   dijkstra = () => {
-    frontier.insert(0, [this.game.curr_x, this.game.curr_y]);
-    came_from[`[${this.game.curr_x},${this.game.curr_y}]`] = null;
-    cost_so_far[`[${this.game.curr_x},${this.game.curr_y}]`] = 0;
+    this.frontier.insert(0, [this.game.curr_x, this.game.curr_y]);
+    this.came_from[`[${this.game.curr_x},${this.game.curr_y}]`] = undefined;
+    this.cost_so_far[`[${this.game.curr_x},${this.game.curr_y}]`] = 0;
 
-    while(!frontier.empty()){
-      let current = frontier.get();
+    while(!this.frontier.empty()){
+      let current = this.frontier.get();
 
       if(this.isGoal(current)){
         break;
@@ -107,26 +109,25 @@ class Pathfinding{
 
       let neighbors = utils.neighborIndex(this.game, current, `${this.game.env.bombs}|${this.game.env.walls}`);
       for(let next of neighbors){
-        let new_cost = cost_so_far[JSON.stringify(current)] + this.cost(JSON.stringify(current), JSON.stringify(next));
-        if((came_from[`[${next}]`] === undefined) || (new_cost < cost_so_far[JSON.stringify(next)])){
-          cost_so_far[JSON.stringify(next)] = new_cost;
-          piority = new_cost;
-          frontier.insert(piority, next);
-          came_from[`[${next}]`] = current;
+        let new_cost = this.cost_so_far[JSON.stringify(current)] + this.cost(JSON.stringify(current), JSON.stringify(next));
+        if(this.came_from[`[${next}]`] === undefined || new_cost < this.cost_so_far[JSON.stringify(next)]){
+          this.cost_so_far[JSON.stringify(next)] = new_cost;
+          this.priority = new_cost;
+          this.frontier.insert(this.priority, next);
+          this.came_from[`[${next}]`] = current;
           // this.game.stage[next[0]][next[1]] = i;
           // i++;
         }
       }
     }
-    this.done = true;
   }
   aStar = () => {
-    frontier.insert(0, [this.game.curr_x, this.game.curr_y]);
-    came_from[`[${this.game.curr_x},${this.game.curr_y}]`] = null;
-    cost_so_far[`[${this.game.curr_x},${this.game.curr_y}]`] = 0;
+    this.frontier.insert(0, [this.game.curr_x, this.game.curr_y]);
+    this.came_from[`[${this.game.curr_x},${this.game.curr_y}]`] = undefined;
+    this.cost_so_far[`[${this.game.curr_x},${this.game.curr_y}]`] = 0;
 
-    while(!frontier.empty()){
-      let current = frontier.get();
+    while(!this.frontier.empty()){
+      let current = this.frontier.get();
 
       if(this.isGoal(current)){
         break;
@@ -134,18 +135,17 @@ class Pathfinding{
 
       let neighbors = utils.neighborIndex(this.game, current, `${this.game.env.bombs}|${this.game.env.walls}`);
       for(let next of neighbors){
-        let new_cost = cost_so_far[JSON.stringify(current)] + this.cost(JSON.stringify(current), JSON.stringify(next));
-        if((came_from[`[${next}]`] === undefined) || (new_cost < cost_so_far[JSON.stringify(next)])){
-          cost_so_far[JSON.stringify(next)] = new_cost;
-          piority = new_cost + this.heuristic([this.game.goal_x, this.game.goal_y], next);
-          frontier.insert(piority, next);
-          came_from[`[${next}]`] = current;
+        let new_cost = this.cost_so_far[JSON.stringify(current)] + this.cost(JSON.stringify(current), JSON.stringify(next));
+        if(this.came_from[`[${next}]`] === undefined || new_cost < this.cost_so_far[JSON.stringify(next)]){
+          this.cost_so_far[JSON.stringify(next)] = new_cost;
+          this.priority = new_cost + this.heuristic([this.game.goal_x, this.game.goal_y], next);
+          this.frontier.insert(this.priority, next);
+          this.came_from[`[${next}]`] = current;
           // this.game.stage[next[0]][next[1]] = i;
           // i++;
         }
       }
     }
-    this.done = true;
   }
 }
 

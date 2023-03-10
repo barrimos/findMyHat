@@ -149,6 +149,7 @@ class Stage{
   traveller = (notLookingFor, solution = false) => {
     this.isSolution = solution;
     let cost = 0;
+    this.weights['[0,0]'] = 0;
     if(this.isSolution){
       this.solution_stage = [...this.stage];
       while(true){
@@ -204,7 +205,7 @@ class Stage{
           let r = this.randomEnv();
           this.stage[this.curr_x][this.curr_y] = this.env[r];
           this.pathway = this.pathway.filter(index => {
-            return JSON.stringify(index) !== JSON.stringify([this.curr_x, this.curr_y]);
+            return JSON.stringify(index) !== `[${this.curr_x},${this.curr_y}]`;
           });
           this.envCount.pathway--;
   
@@ -281,7 +282,7 @@ class Stage{
     // filter out if key is pathway do not filter out.
     if(key !== 'pathway'){
       this[key] = this[key].filter(index => {
-        return JSON.stringify(index) !== JSON.stringify([this.goal_x, this.goal_y]);
+        return JSON.stringify(index) !== `[${this.goal_x},${this.goal_y}]`;
       });
       this.envCount.pathway++;
       this.envCount[key]--;
@@ -308,7 +309,7 @@ class Stage{
   
         // filter walls and bombs out from that array
         this[obj] = this[obj].filter(index => {
-          return JSON.stringify(index) !== JSON.stringify([this[obj][rand][0], this[obj][rand][1]]);
+          return JSON.stringify(index) !== `[${this[obj][rand][0]},${this[obj][rand][1]}]`;
         });
   
         // update count

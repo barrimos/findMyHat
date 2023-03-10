@@ -16,14 +16,14 @@ const renderStage = (game) => {
 
   const game = new Stage();
   const move = new Movement();
-  const pathFinding = new Pathfinding(game, move);
+  const pathFinding = new Pathfinding(game);
   let command, method, done = false;
 
   renderStage(game.stage);
 
-  console.log('Start pacman', [game.curr_x, game.curr_y]);
-  console.log('Finish goal', [game.goal_x, game.goal_y]);
-  console.log(game.envCount);
+  // console.log('Start pacman', [game.curr_x, game.curr_y]);
+  // console.log('Finish goal', [game.goal_x, game.goal_y]);
+  // console.log(game.envCount);
 
   while(!game.is_over){
     // Input direction
@@ -124,7 +124,7 @@ const renderStage = (game) => {
     //if win
     if(game.is_win){
       console.log('CONGRATULATION!!!');
-      break;
+      return start();
     }
   }
 })();
