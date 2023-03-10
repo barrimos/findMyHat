@@ -1,3 +1,11 @@
+/**
+ * @Credit
+ * From https://www.redblobgames.com/
+ * Copyright 2018 Red Blob Games <redblobgames@gmail.com>
+ *
+ */
+
+
 const utils = require('./Utils');
 const { Queue } = require('./Queue');
 const { Movement } = require('./Movement');
