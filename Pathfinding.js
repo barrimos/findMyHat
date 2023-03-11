@@ -56,7 +56,7 @@ class Pathfinding{
   }
   bfs = () => {
     this.frontier.put([this.game.curr_x, this.game.curr_y]);
-    this.came_from[`[${this.game.curr_x},${this.game.curr_y}]`] = undefined;
+    this.came_from[`[${this.game.curr_x},${this.game.curr_y}]`] = null;
     
     while(!this.frontier.empty()){
       let current = this.frontier.get();
@@ -71,15 +71,13 @@ class Pathfinding{
         if(this.came_from[`[${next}]`] === undefined){
           this.frontier.put(next);
           this.came_from[`[${next}]`] = current;
-          // this.game.stage[next[0]][next[1]] = i;
-          // i++;
         }
       }
     }
   }
   greedy_bfs = () => {
     this.frontier.put([this.game.curr_x, this.game.curr_y]);
-    this.came_from[`[${this.game.curr_x},${this.game.curr_y}]`] = undefined;
+    this.came_from[`[${this.game.curr_x},${this.game.curr_y}]`] = null;
 
     while(!this.frontier.empty()){
       let current = this.frontier.get();
@@ -94,8 +92,6 @@ class Pathfinding{
           this.priority = this.heuristic([this.goal_x, this.goal_y], next)
           this.frontier.insert(this.priority, next);
           this.came_from[`[${next}]`] = current;
-          // this.game.stage[next[0]][next[1]] = i;
-          // i++;
         }
       }
     }
@@ -105,7 +101,7 @@ class Pathfinding{
 
   dijkstra = () => {
     this.frontier.insert(0, [this.game.curr_x, this.game.curr_y]);
-    this.came_from[`[${this.game.curr_x},${this.game.curr_y}]`] = undefined;
+    this.came_from[`[${this.game.curr_x},${this.game.curr_y}]`] = null;
     this.cost_so_far[`[${this.game.curr_x},${this.game.curr_y}]`] = 0;
 
     while(!this.frontier.empty()){
@@ -123,15 +119,13 @@ class Pathfinding{
           this.priority = new_cost;
           this.frontier.insert(this.priority, next);
           this.came_from[`[${next}]`] = current;
-          // this.game.stage[next[0]][next[1]] = i;
-          // i++;
         }
       }
     }
   }
   aStar = () => {
     this.frontier.insert(0, [this.game.curr_x, this.game.curr_y]);
-    this.came_from[`[${this.game.curr_x},${this.game.curr_y}]`] = undefined;
+    this.came_from[`[${this.game.curr_x},${this.game.curr_y}]`] = null;
     this.cost_so_far[`[${this.game.curr_x},${this.game.curr_y}]`] = 0;
 
     while(!this.frontier.empty()){
@@ -149,8 +143,6 @@ class Pathfinding{
           this.priority = new_cost + this.heuristic([this.game.goal_x, this.game.goal_y], next);
           this.frontier.insert(this.priority, next);
           this.came_from[`[${next}]`] = current;
-          // this.game.stage[next[0]][next[1]] = i;
-          // i++;
         }
       }
     }
